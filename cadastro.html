@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vitraclip | Configuração de Conta</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root { --primary: #255fff; --bg: #05070a; --glass: rgba(255, 255, 255, 0.03); }
+        
+        body { 
+            background: var(--bg); color: white; font-family: 'Plus Jakarta Sans', sans-serif;
+            display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(37, 95, 255, 0.15), transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(37, 95, 255, 0.1), transparent 40%);
+        }
+
+        /* Logo no topo do Card */
+        .logo-area { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 30px; }
+        .logo-dot { width: 14px; height: 14px; background: var(--primary); border-radius: 3px; transform: rotate(45deg); box-shadow: 0 0 20px var(--primary); }
+        .logo-text { font-weight: 800; letter-spacing: -1px; font-size: 1.2rem; }
+
+        .reg-card {
+            background: rgba(10, 12, 18, 0.6); backdrop-filter: blur(30px);
+            padding: 40px; border-radius: 32px; border: 1px solid rgba(255,255,255,0.1);
+            width: 100%; max-width: 480px; box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+        }
+
+        .progress-container { margin-bottom: 35px; }
+        .progress-bar { display: flex; gap: 8px; margin-top: 10px; }
+        .progress-dot { flex: 1; height: 4px; background: rgba(255,255,255,0.05); border-radius: 10px; transition: 0.4s; }
+        .progress-dot.active { background: var(--primary); box-shadow: 0 0 15px var(--primary); }
+
+        .step { display: none; }
+        .step.active { display: block; }
+
+        h2 { font-size: 1.8rem; font-weight: 800; margin-bottom: 8px; letter-spacing: -1px; }
+        p.subtitle { color: #a0a0a8; font-size: 0.9rem; margin-bottom: 25px; }
+
+        .input-group { position: relative; margin-bottom: 15px; }
+        .input-group i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--primary); opacity: 0.7; }
+
+        input, select {
+            width: 100%; padding: 16px 16px 16px 45px; box-sizing: border-box;
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px; color: white; font-size: 0.95rem; outline: none; transition: 0.3s;
+        }
+        input:focus, select:focus { border-color: var(--primary); background: rgba(37, 95, 255, 0.05); }
+
+        .btn-row { display: flex; gap: 12px; margin-top: 30px; }
+        .btn {
+            flex: 1; padding: 16px; border-radius: 14px; font-weight: 700; cursor: pointer; 
+            border: none; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-next { background: var(--primary); color: white; box-shadow: 0 10px 20px rgba(37, 95, 255, 0.2); }
+        .btn-prev { background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); }
+        .btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+
+        .form-footer { text-align: center; margin-top: 25px; font-size: 0.8rem; color: #666; }
+    </style>
+</head>
+<body>
+
+    <div class="reg-card">
+        <div class="logo-area">
+            <div class="logo-dot"></div>
+            <span class="logo-text">VITRACLIP</span>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-dot active" id="p1"></div>
+                <div class="progress-dot" id="p2"></div>
+                <div class="progress-dot" id="p3"></div>
+            </div>
+        </div>
+
+        <div class="step active" id="step1">
+            <h2>Perfil Pessoal</h2>
+            <p class="subtitle">Como devemos chamar você?</p>
+            
+            <div class="input-group">
+                <i data-lucide="user" size="18"></i>
+                <input type="text" id="userName" placeholder="Seu nome completo">
+            </div>
+            <div class="input-group">
+                <i data-lucide="mail" size="18"></i>
+                <input type="email" id="userEmail" placeholder="E-mail profissional">
+            </div>
+            <div class="input-group">
+                <i data-lucide="phone" size="18"></i>
+                <input type="text" placeholder="WhatsApp / Telefone">
+            </div>
+            <button class="btn btn-next" onclick="goTo(2)">Continuar <i data-lucide="arrow-right" size="18"></i></button>
+        </div>
+
+        <div class="step" id="step2">
+            <h2>Dados da Empresa</h2>
+            <p class="subtitle">Informações para otimizar seu estoque.</p>
+            
+            <div class="input-group">
+                <i data-lucide="briefcase" size="18"></i>
+                <input type="text" id="companyName" placeholder="Nome da Loja ou Empresa">
+            </div>
+            <div class="input-group">
+                <i data-lucide="shopping-bag" size="18"></i>
+                <select id="niche">
+                    <option value="">Nicho de Atuação</option>
+                    <option>Moda & Acessórios</option>
+                    <option>Eletrônicos</option>
+                    <option>Colecionáveis (Cards/Jogos)</option>
+                    <option>Outros</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <i data-lucide="bar-chart" size="18"></i>
+                <select>
+                    <option value="">Volume de itens atual</option>
+                    <option>0 - 50 itens</option>
+                    <option>51 - 500 itens</option>
+                    <option>Mais de 500</option>
+                </select>
+            </div>
+
+            <div class="btn-row">
+                <button class="btn btn-prev" onclick="goTo(1)">Voltar</button>
+                <button class="btn btn-next" onclick="goTo(3)">Próximo</button>
+            </div>
+        </div>
+
+        <div class="step" id="step3">
+            <h2>Segurança</h2>
+            <p class="subtitle">Finalize sua chave de acesso segura.</p>
+            
+            <div class="input-group">
+                <i data-lucide="lock" size="18"></i>
+                <input type="password" placeholder="Senha de acesso">
+            </div>
+            <div class="input-group">
+                <i data-lucide="shield-check" size="18"></i>
+                <input type="password" placeholder="Confirmar senha">
+            </div>
+
+            <div class="btn-row">
+                <button class="btn btn-prev" onclick="goTo(2)">Voltar</button>
+                <button class="btn btn-next" onclick="finish()">Concluir Registro <i data-lucide="check" size="18"></i></button>
+            </div>
+        </div>
+
+        <div class="form-footer">
+            Sua conta será protegida por criptografia de 256 bits.
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        function goTo(step) {
+            // Esconde todas as etapas
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            
+            // Ativa a etapa atual
+            const currentStep = document.getElementById('step' + step);
+            currentStep.classList.add('active');
+
+            // Atualiza a Barra de Progresso
+            document.getElementById('p2').classList.toggle('active', step >= 2);
+            document.getElementById('p3').classList.toggle('active', step >= 3);
+
+            // Animação de entrada
+            gsap.from(currentStep, { 
+                opacity: 0, 
+                y: 10, 
+                filter: "blur(10px)",
+                duration: 0.4 
+            });
+        }
+
+  function finish() {
+    // Captura TODOS os dados preenchidos
+    const userObj = {
+        nome: document.getElementById('userName').value || 'Usuário',
+        email: document.getElementById('userEmail').value || 'Não informado',
+        // Como o telefone não tem ID no seu HTML, pegamos pelo seletor de tipo
+        telefone: document.querySelector('input[placeholder*="WhatsApp"]').value || '(00) 00000-0000',
+        empresa: document.getElementById('companyName').value || 'Minha Empresa',
+        nicho: document.getElementById('niche').value || 'Não definido',
+        dataAdesao: new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })
+    };
+
+    // Salva o objeto completo
+    localStorage.setItem('vitraclip_user_data', JSON.stringify(userObj));
+
+    // Efeito de transição
+    gsap.to(".reg-card", { 
+        scale: 0.9, 
+        opacity: 0, 
+        duration: 0.5, 
+        onComplete: () => {
+            window.location.href = 'dashboard.html';
+        }
+    });
+}
+    </script>
+</body>
+</html>

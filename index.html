@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vitraclip | Full Inventory OS</title>
+    <link rel="icon" type="image/png" href="https://i.ibb.co/LzNfVfM/IMG-5868.jpg">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        :root {
+            --primary: #255fff;
+            --bg: #05070a;
+            --card: #0c0e14;
+            --border: rgba(255, 255, 255, 0.08);
+            --text: #ffffff;
+            --dim: #a0a0a8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
+        body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; line-height: 1.4; }
+
+        .grid-bg { position: fixed; inset: 0; background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px); background-size: 40px 40px; z-index: -1; mask-image: radial-gradient(circle at center, black, transparent 90%); }
+
+        nav { position: fixed; top: 0; width: 100%; background: rgba(5, 7, 10, 0.8); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border); padding: 12px 5%; display: flex; justify-content: space-between; align-items: center; z-index: 1000; }
+        .logo { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 1.1rem; text-decoration: none; color: white; }
+        .logo-box { width: 12px; height: 12px; background: var(--primary); border-radius: 3px; animation: pulse 2s infinite; }
+
+        .hero { padding: 110px 5% 30px; text-align: center; }
+        .hero h1 { font-size: clamp(2.2rem, 5vw, 4rem); font-weight: 800; line-height: 1.1; margin-bottom: 15px; letter-spacing: -1px; }
+        .hero p { max-width: 650px; margin: 0 auto 25px; color: var(--dim); font-size: 1.1rem; }
+
+        section { padding: 30px 5%; max-width: 1300px; margin: 0 auto; }
+        .section-header { margin-bottom: 25px; border-left: 4px solid var(--primary); padding-left: 15px; }
+
+        .f-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }
+        .f-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 25px; transition: 0.3s; position: relative; }
+        .f-card:hover { border-color: var(--primary); background: #11141b; transform: translateY(-5px); }
+        .f-card i { color: var(--primary); margin-bottom: 15px; display: block; }
+
+        .mini-ui { width: 100%; height: 90px; background: #05070a; border-radius: 8px; border: 1px solid var(--border); margin-top: 15px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .scan-anim { position: absolute; width: 100%; height: 2px; background: var(--primary); top: 0; animation: scanMove 2.5s infinite; box-shadow: 0 0 10px var(--primary); }
+
+        .p-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        .p-card { background: var(--card); border: 1px solid var(--border); padding: 35px; border-radius: 24px; position: relative; display: flex; flex-direction: column; }
+        .p-card.pro { border: 2px solid var(--primary); transform: scale(1.02); z-index: 2; }
+        .price { font-size: 2.8rem; font-weight: 800; margin: 15px 0; }
+        .p-list { list-style: none; font-size: 0.85rem; margin-bottom: 25px; flex-grow: 1; }
+        .p-list li { margin-bottom: 10px; display: flex; align-items: center; gap: 8px; color: var(--dim); }
+
+        .faq-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .faq-item { background: var(--card); border: 1px solid var(--border); padding: 20px; border-radius: 12px; }
+
+        .btn { padding: 12px 24px; border-radius: 8px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; border: none; transition: 0.2s; }
+        .btn-p { background: var(--primary); color: white; }
+        .btn-s { background: var(--border); color: white; }
+
+        footer { border-top: 1px solid var(--border); padding: 50px 5% 30px; background: #020305; margin-top: 40px; }
+        .footer-content { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 30px; }
+        .footer-col a { display: block; color: var(--dim); text-decoration: none; font-size: 0.85rem; margin-bottom: 8px; }
+
+        @keyframes scanMove { 0% { top: 0; } 100% { top: 100%; } }
+        @keyframes pulse { 0%, 100% { opacity: 0.5; transform: scale(1); } 50% { opacity: 1; transform: scale(1.1); } }
+        .float { animation: floatAni 3s infinite ease-in-out; }
+        @keyframes floatAni { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+        .spin { animation: spinAni 6s infinite linear; }
+        @keyframes spinAni { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+
+<nav>
+    <a href="#" class="logo"><div class="logo-box"></div> VITRACLIP</a>
+    <div style="display: flex; gap: 25px;">
+        <a href="#recursos" style="color: var(--dim); text-decoration: none; font-size: 0.9rem;">Recursos</a>
+        <a href="#planos" style="color: var(--dim); text-decoration: none; font-size: 0.9rem;">Preços</a>
+    </div>
+    <a href="login.html" class="btn btn-s" style="padding: 7px 20px; font-size: 0.8rem;">Entrar</a>
+</nav>
+
+<section class="hero">
+    <h1>Logística Inteligente<br><span style="color: var(--primary);">Sem Esforço Manual</span></h1>
+    <p>O ecossistema definitivo para gerenciar, catalogar e vender seu estoque físico com o poder da automação visual.</p>
+    <div style="display: flex; gap: 12px; justify-content: center;">
+        <a href="cadastro.html" class="btn btn-p">Começar Jornada <i data-lucide="rocket" class="float"></i></a>
+        <a href="#recursos" class="btn btn-s">Explorar Funções</a>
+    </div>
+</section>
+
+<section id="recursos">
+    <div class="section-header">
+        <h2>Recursos Estruturais</h2>
+        <p style="color: var(--dim);">A arquitetura completa para sua operação.</p>
+    </div>
+    <div class="f-grid">
+        <div class="f-card">
+            <i data-lucide="scan" class="float"></i>
+            <h3>Scanner Adaptativo</h3>
+            <p>Extração automática de metadados via imagem em menos de 2 segundos.</p>
+            <div class="mini-ui"><div class="scan-anim"></div><i data-lucide="box" style="opacity: 0.1;" size="40"></i></div>
+        </div>
+        <div class="f-card">
+            <i data-lucide="cpu" class="spin"></i>
+            <h3>Processamento Cloud</h3>
+            <p>Sincronização em tempo real entre todos os seus dispositivos logados.</p>
+            <div class="mini-ui"><i data-lucide="cloud" class="float" color="#255fff"></i></div>
+        </div>
+        <div class="f-card">
+            <i data-lucide="share-2" class="float"></i>
+            <h3>Exportação Ágil</h3>
+            <p>Gere planilhas, PDFs ou envie direto para APIs de marketplaces.</p>
+            <div class="mini-ui"><div style="width:60%; height:8px; background:var(--primary); border-radius:4px;"></div></div>
+        </div>
+        <div class="f-card">
+            <i data-lucide="shield-check" class="float"></i>
+            <h3>Segurança Enterprise</h3>
+            <p>Backups automatizados e criptografia em todos os níveis de dados.</p>
+            <div class="mini-ui"><i data-lucide="lock" size="30" color="#255fff"></i></div>
+        </div>
+    </div>
+</section>
+
+<section id="planos">
+    <div class="section-header">
+        <h2>Planos Profissionais</h2>
+        <p style="color: var(--dim);">Transparência total para o seu crescimento.</p>
+    </div>
+    <div class="p-grid">
+        <div class="p-card">
+            <h4 style="color: var(--dim)">STARTUP</h4>
+            <div class="price">R$ 0</div>
+            <ul class="p-list">
+                <li><i data-lucide="check-circle-2" size="14"></i> 50 scans mensais</li>
+                <li><i data-lucide="check-circle-2" size="14"></i> 1 Ponto de acesso</li>
+                <li><i data-lucide="check-circle-2" size="14"></i> Suporte via Comunidade</li>
+            </ul>
+            <a href="cadastro.html" class="btn btn-s" style="justify-content: center;">Criar Conta Grátis</a>
+        </div>
+        <div class="p-card pro">
+            <div style="position: absolute; top: 15px; right: 20px; background: var(--primary); font-size: 0.6rem; font-weight: 900; padding: 4px 12px; border-radius: 50px;">ELITE</div>
+            <h4>PROFISSIONAL</h4>
+            <div class="price">R$ 97<span>/mês</span></div>
+            <ul class="p-list">
+                <li><i data-lucide="check-circle-2" size="14"></i> Scans Ilimitados</li>
+                <li><i data-lucide="check-circle-2" size="14"></i> 5 Pontos de acesso</li>
+                <li><i data-lucide="check-circle-2" size="14"></i> APIs de Integração</li>
+                <li><i data-lucide="check-circle-2" size="14"></i> Suporte Prioritário</li>
+            </ul>
+            <a href="cadastro.html" class="btn btn-p" style="justify-content: center;">Assinar Plano Elite</a>
+        </div>
+    </div>
+</section>
+
+<section id="faq">
+    <div class="section-header">
+        <h2>Perguntas Frequentes</h2>
+    </div>
+    <div class="faq-grid">
+        <div class="faq-item">
+            <h5 style="margin-bottom: 10px; color: var(--primary);">Como funciona o scanner?</h5>
+            <p style="font-size: 0.85rem; color: var(--dim);">Basta tirar uma foto do item. Nossa IA analisa padrões visuais e preenche a ficha técnica automaticamente.</p>
+        </div>
+        <div class="faq-item">
+            <h5 style="margin-bottom: 10px; color: var(--primary);">Posso cancelar a qualquer momento?</h5>
+            <p style="font-size: 0.85rem; color: var(--dim);">Sim. Não temos contratos de fidelidade. Você pode fazer o downgrade ou cancelar no painel.</p>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <div class="footer-content">
+        <div class="footer-col" style="grid-column: span 2;">
+            <a href="#" class="logo" style="margin-bottom: 20px;"><div class="logo-box"></div> VITRACLIP</a>
+            <p style="font-size: 0.85rem; color: var(--dim); max-width: 300px;">A plataforma líder em inteligência de inventário. Transformamos depósitos em máquinas de vendas.</p>
+        </div>
+        <div class="footer-col">
+            <h5 style="margin-bottom: 15px;">Links Rápidos</h5>
+            <a href="login.html">Login</a>
+            <a href="cadastro.html">Cadastro</a>
+            <a href="#recursos">Recursos</a>
+        </div>
+        <div class="footer-col">
+            <h5 style="margin-bottom: 15px;">Suporte</h5>
+            <a href="#">Documentação</a>
+            <a href="#">Privacidade</a>
+            <a href="#">Contato</a>
+        </div>
+    </div>
+    <div style="margin-top: 40px; border-top: 1px solid var(--border); padding-top: 20px; display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--dim);">
+        <span>&copy; 2026 Vitraclip Software.</span>
+        <div style="display: flex; gap: 15px;">
+            <i data-lucide="instagram" size="16"></i>
+            <i data-lucide="linkedin" size="16"></i>
+        </div>
+    </div>
+</footer>
+
+<script>
+    lucide.createIcons();
+    gsap.from(".f-card", { opacity: 0, y: 20, stagger: 0.1, duration: 0.8, scrollTrigger: "#recursos" });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Vitraclip | Perfil</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root { --primary: #255fff; --bg: #05070a; --card: rgba(255, 255, 255, 0.03); --border: rgba(255, 255, 255, 0.08); --text: #94a3b8; }
+        body { background: var(--bg); color: white; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; display: flex; min-height: 100vh; }
+        
+        aside { width: 260px; background: rgba(8, 10, 15, 0.7); border-right: 1px solid var(--border); position: fixed; height: 100vh; backdrop-filter: blur(20px); z-index: 100; display: flex; flex-direction: column; }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 14px 20px; color: var(--text); text-decoration: none; margin: 5px 15px; border-radius: 12px; transition: 0.3s; }
+        .nav-item.active { background: rgba(37, 95, 255, 0.1); color: var(--primary); font-weight: 700; border: 1px solid rgba(37, 95, 255, 0.2); }
+        
+        main { margin-left: 260px; padding: 60px; width: 100%; }
+        .profile-card { background: var(--card); border: 1px solid var(--border); border-radius: 32px; padding: 40px; max-width: 800px; }
+        .profile-header { display: flex; align-items: center; gap: 25px; margin-bottom: 40px; border-bottom: 1px solid var(--border); padding-bottom: 30px; }
+        .avatar { width: 80px; height: 80px; background: var(--primary); border-radius: 24px; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 800; box-shadow: 0 10px 20px rgba(37, 95, 255, 0.2); }
+        
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        .info-group label { display: block; color: var(--text); font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; }
+        .info-group p { margin: 0; font-size: 18px; font-weight: 600; }
+        .badge-status { display: inline-block; margin-top: 10px; padding: 6px 12px; background: rgba(0, 255, 136, 0.1); color: #00ff88; border-radius: 8px; font-size: 12px; font-weight: 700; }
+    </style>
+</head>
+<body>
+    <aside>
+        <div style="padding: 45px 35px;"><h2 style="margin:0; font-weight:900; letter-spacing:-1.5px;">vitraclip<span style="color:var(--primary)">.</span></h2></div>
+        <nav>
+            <a href="dashboard.html" class="nav-item"><i data-lucide="layout-grid"></i> Dashboard</a>
+            <a href="alertas.html" class="nav-item"><i data-lucide="bell"></i> Alertas</a>
+            <a href="estimativa.html" class="nav-item"><i data-lucide="zap"></i> Estimativa</a>
+            <a href="relatorio.html" class="nav-item"><i data-lucide="pie-chart"></i> Relatório</a>
+            <a href="perfil.html" class="nav-item active"><i data-lucide="user"></i> Perfil</a>
+        </nav>
+    </aside>
+
+    <main>
+        <div class="profile-card">
+            <div class="profile-header">
+                <div class="avatar" id="avatar-char">U</div>
+                <div>
+                    <h2 id="view-nome" style="margin:0; font-size: 28px;">Nome do Usuário</h2>
+                    <span class="badge-status">Conta Vision Neural Ativa</span>
+                </div>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-group">
+                    <label>E-mail Profissional</label>
+                    <p id="view-email">email@exemplo.com</p>
+                </div>
+                <div class="info-group">
+                    <label>WhatsApp / Telefone</label>
+                    <p id="view-tel">(00) 00000-0000</p>
+                </div>
+                <div class="info-group">
+                    <label>Empresa / Loja</label>
+                    <p id="view-empresa">Nome da Empresa</p>
+                </div>
+                <div class="info-group">
+                    <label>Nicho de Atuação</label>
+                    <p id="view-nicho">Nicho</p>
+                </div>
+                <div class="info-group">
+                    <label>Membro desde</label>
+                    <p id="view-data">17 de Fevereiro, 2026</p>
+                </div>
+                <div class="info-group">
+                    <label>ID de Segurança</label>
+                    <p style="font-family: monospace; font-size: 14px; color: var(--primary);">VC-9982X-2026</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        function loadProfile() {
+            const data = JSON.parse(localStorage.getItem('vitraclip_user_data'));
+
+            if (data) {
+                document.getElementById('view-nome').innerText = data.nome;
+                document.getElementById('view-email').innerText = data.email;
+                document.getElementById('view-tel').innerText = data.telefone;
+                document.getElementById('view-empresa').innerText = data.empresa;
+                document.getElementById('view-nicho').innerText = data.nicho;
+                document.getElementById('view-data').innerText = data.dataAdesao;
+                document.getElementById('avatar-char').innerText = data.nome.charAt(0).toUpperCase();
+            }
+        }
+
+        window.onload = loadProfile;
+    </script>
+</body>
+</html>

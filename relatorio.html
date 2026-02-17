@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Vitraclip | Relatório Geral</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root { 
+            --purple: #a855f7; 
+            --bg: #05070a; 
+            --card: rgba(255, 255, 255, 0.03); 
+            --border: rgba(255, 255, 255, 0.08); 
+            --text: #94a3b8; 
+        }
+
+        body { 
+            background: var(--bg); 
+            color: white; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            margin: 0; 
+            display: flex; 
+            min-height: 100vh;
+            background-image: radial-gradient(circle at top right, rgba(168, 85, 247, 0.1), transparent 50%);
+            background-attachment: fixed;
+        }
+
+        aside { 
+            width: 260px; 
+            background: rgba(8, 10, 15, 0.8); 
+            border-right: 1px solid var(--border); 
+            position: fixed; 
+            height: 100vh; 
+            backdrop-filter: blur(20px); 
+            z-index: 100; 
+        }
+
+        .nav-item { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            padding: 14px 20px; 
+            color: var(--text); 
+            text-decoration: none; 
+            margin: 5px 15px; 
+            border-radius: 12px; 
+        }
+
+        .nav-item.active { 
+            background: rgba(168, 85, 247, 0.1); 
+            color: var(--purple); 
+            font-weight: 700; 
+            border: 1px solid rgba(168, 85, 247, 0.2); 
+        }
+
+        main { margin-left: 260px; padding: 60px; width: 100%; box-sizing: border-box; }
+
+        .report-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .glass-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 30px;
+        }
+
+        .full-card { grid-column: 1 / -1; }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .stat-row:last-child { border: none; }
+
+        .label { color: var(--text); font-size: 14px; }
+        .value { font-weight: 700; }
+        .vencido { color: #ff3b3b; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { text-align: left; color: var(--text); font-size: 12px; text-transform: uppercase; padding: 15px; border-bottom: 1px solid var(--border); }
+        td { padding: 15px; border-bottom: 1px solid var(--border); font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <aside>
+        <div style="padding: 45px 35px;"><h2 style="margin:0; font-weight:900; letter-spacing:-1.5px;">vitraclip<span style="color:var(--purple)">.</span></h2></div>
+        <nav>
+            <a href="dashboard.html" class="nav-item"><i data-lucide="layout-grid"></i> Dashboard</a>
+            <a href="alertas.html" class="nav-item"><i data-lucide="bell"></i> Alertas</a>
+            <a href="estimativa.html" class="nav-item"><i data-lucide="zap"></i> Estimativa</a>
+            <a href="relatorio.html" class="nav-item active"><i data-lucide="pie-chart"></i> Relatório</a>
+        </nav>
+    </aside>
+
+    <main>
+        <header style="margin-bottom: 40px;">
+            <h1 style="font-size: 38px; font-weight: 800; margin:0;">Relatório Analítico</h1>
+            <p style="color:var(--text)">Consolidado de capturas, vencimentos e projeções.</p>
+        </header>
+
+        <div class="report-grid">
+            <div class="glass-card">
+                <h3 style="margin-top:0"><i data-lucide="activity" size="18" style="vertical-align:middle"></i> Saúde Financeira</h3>
+                <div class="stat-row">
+                    <span class="label">Total Geral Escaneado</span>
+                    <span class="value" id="res-total">R$ 0,00</span>
+                </div>
+                <div class="stat-row">
+                    <span class="label">Total Atrasado (Alertas)</span>
+                    <span class="value vencido" id="res-vencido">R$ 0,00</span>
+                </div>
+                <div class="stat-row">
+                    <span class="label">Projeção Próximo Mês</span>
+                    <span class="value" id="res-proj" style="color:var(--purple)">R$ 0,00</span>
+                </div>
+            </div>
+
+            <div class="glass-card" style="display:flex; align-items:center; justify-content:center;">
+                <canvas id="chartPizza" style="max-height: 200px;"></canvas>
+            </div>
+
+            <div class="glass-card full-card">
+                <h3 style="margin-top:0">Detalhamento por Documento</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Empresa</th>
+                            <th>Data</th>
+                            <th>Status</th>
+                            <th>Valor</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-corpo">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        function cleanVal(v) {
+            if (typeof v === 'number') return v;
+            let limpo = String(v || "0").replace(/[^\d,.-]/g, '');
+            if (limpo.includes(',') && limpo.includes('.')) {
+                limpo = limpo.replace(/\./g, '').replace(',', '.');
+            } else { limpo = limpo.replace(',', '.'); }
+            return parseFloat(limpo) || 0;
+        }
+
+        function gerarRelatorio() {
+            const db = JSON.parse(localStorage.getItem('vitraclip_scans') || "[]");
+            const hoje = new Date();
+            hoje.setHours(0,0,0,0);
+
+            let totalGeral = 0;
+            let totalVencido = 0;
+            const empresas = {};
+
+            const tabela = document.getElementById('tabela-corpo');
+
+            db.forEach(item => {
+                const valor = cleanVal(item.valor);
+                totalGeral += valor;
+
+                // Lógica de Vencimento
+                const [d, m, y] = item.data.split('/');
+                const dataVenc = new Date(y, m-1, d);
+                const isVencido = dataVenc < hoje;
+                if(isVencido) totalVencido += valor;
+
+                // Agrupar para o gráfico
+                empresas[item.empresa] = (empresas[item.empresa] || 0) + valor;
+
+                // Popular Tabela
+                tabela.innerHTML += `
+                    <tr>
+                        <td style="font-weight:700">${item.empresa}</td>
+                        <td>${item.data}</td>
+                        <td><span style="color:${isVencido ? '#ff3b3b' : '#00ff88'}">${isVencido ? 'Atrasado' : 'Em dia'}</span></td>
+                        <td style="font-weight:700">R$ ${valor.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+                    </tr>
+                `;
+            });
+
+            // Preencher Cards
+            document.getElementById('res-total').innerText = totalGeral.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+            document.getElementById('res-vencido').innerText = totalVencido.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+            document.getElementById('res-proj').innerText = (totalGeral * 1.1).toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+
+            // Gráfico de Pizza
+            new Chart(document.getElementById('chartPizza'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(empresas),
+                    datasets: [{
+                        data: Object.values(empresas),
+                        backgroundColor: ['#a855f7', '#255fff', '#00ff88', '#ff3b3b', '#ff9500'],
+                        borderWidth: 0,
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    cutout: '70%',
+                    plugins: { legend: { position: 'right', labels: { color: '#94a3b8', usePointStyle: true } } }
+                }
+            });
+
+            lucide.createIcons();
+        }
+
+        window.onload = gerarRelatorio;
+    </script>
+</body>
+</html>

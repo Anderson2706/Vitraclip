@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Vitraclip | Contas a Pagar</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root { 
+            --primary: #255fff;
+            --red: #ff3b3b; 
+            --green: #00c853;
+            --bg: #05070a; 
+            --card: rgba(255, 255, 255, 0.03); 
+            --border: rgba(255, 255, 255, 0.08); 
+            --text: #94a3b8; 
+        }
+        * { box-sizing: border-box; }
+        body { 
+            background: var(--bg); 
+            color: white; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            margin: 0; 
+            display: flex; 
+            min-height: 100vh;
+            background-image: radial-gradient(circle at top right, rgba(37, 95, 255, 0.05), transparent 50%);
+            background-attachment: fixed;
+        }
+        aside { 
+            width: 260px; 
+            background: rgba(8, 10, 15, 0.8); 
+            border-right: 1px solid var(--border); 
+            position: fixed; 
+            height: 100vh; 
+            backdrop-filter: blur(20px); 
+            z-index: 100; 
+            display: flex;
+            flex-direction: column;
+        }
+        .nav-item { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            padding: 14px 20px; 
+            color: var(--text); 
+            text-decoration: none; 
+            margin: 5px 15px; 
+            border-radius: 12px; 
+            transition: 0.3s; 
+        }
+        .nav-item.active { 
+            background: rgba(37, 95, 255, 0.1); 
+            color: var(--primary); 
+            font-weight: 700; 
+            border: 1px solid rgba(37, 95, 255, 0.2); 
+        }
+        main { margin-left: 260px; padding: 60px; width: 100%; }
+        
+        .summary-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            padding: 30px;
+            border-radius: 28px;
+            margin-bottom: 30px;
+            border-left: 5px solid var(--primary);
+        }
+
+        .a-row { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 20px; 
+            background: rgba(255,255,255,0.02); 
+            border-radius: 20px; 
+            margin-bottom: 12px; 
+            border: 1px solid transparent; 
+            transition: 0.3s;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn-action {
+            padding: 10px 16px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 800;
+            cursor: pointer;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.3s;
+            text-transform: uppercase;
+        }
+
+        .btn-pay { background: rgba(0, 200, 83, 0.1); color: var(--green); border: 1px solid rgba(0, 200, 83, 0.2); }
+        .btn-pay:hover { background: var(--green); color: white; }
+        
+        .btn-delete { background: rgba(255, 59, 59, 0.1); color: var(--red); border: 1px solid rgba(255, 59, 59, 0.2); }
+        .btn-delete:hover { background: var(--red); color: white; }
+
+        .status-badge {
+            font-size: 10px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 800;
+            margin-left: 10px;
+        }
+        .bg-pendente { background: rgba(255, 149, 0, 0.1); color: #ff9500; }
+
+        #btn-ver-tudo {
+            display: block; width: 100%; padding: 15px; margin-top: 20px;
+            background: transparent; border: 1px solid var(--border);
+            color: var(--text); border-radius: 15px; cursor: pointer;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <aside>
+        <div style="padding: 45px 35px;"><h2 style="margin:0; font-weight:900; letter-spacing:-1.5px;">vitraclip<span style="color:var(--primary)">.</span></h2></div>
+        <nav>
+            <a href="dashboard.html" class="nav-item"><i data-lucide="layout-grid"></i> Dashboard</a>
+            <a href="pagar.html" class="nav-item active"><i data-lucide="wallet"></i> Contas a Pagar</a>
+            <a href="alertas.html" class="nav-item"><i data-lucide="bell"></i> Alertas</a>
+            <a href="estimativa.html" class="nav-item"><i data-lucide="zap"></i> Estimativa</a>
+            <a href="relatorio.html" class="nav-item"><i data-lucide="pie-chart"></i> Relatório</a>
+            <a href="perfil.html" class="nav-item"><i data-lucide="user"></i> Perfil</a>
+            
+            <div style="margin-top: auto; padding: 20px 15px; margin-bottom: 20px;">
+                <a href="scanner.html" class="nav-item" style="border: 1px dashed var(--primary); color: var(--primary); justify-content: center; background: rgba(37, 95, 255, 0.05);">
+                    <i data-lucide="scan"></i> NOVO SCAN
+                </a>
+            </div>
+        </nav>
+    </aside>
+
+    <main>
+        <header style="margin-bottom: 50px;">
+            <h1 style="font-size: 38px; font-weight: 800; margin:0; letter-spacing:-1px;">Contas a Pagar</h1>
+            <p style="color:var(--text); margin-top: 8px;">Gerencie e liquide suas despesas escaneadas.</p>
+        </header>
+
+        <div class="summary-card">
+            <small style="color:var(--primary); font-weight:800;">PENDENTE PARA PAGAMENTO</small>
+            <h2 id="total-pendente" style="font-size: 42px; margin:10px 0;">R$ 0,00</h2>
+        </div>
+
+        <div id="lista-pagar"></div>
+        <button id="btn-ver-tudo" style="display: none;">Ver Histórico Completo</button>
+    </main>
+
+    <script>
+        lucide.createIcons();
+        let mostrarTodos = false;
+
+        function cleanVal(v) {
+            if (typeof v === 'number') return v;
+            let limpo = String(v || "0").replace(/[^\d,.-]/g, '');
+            if (limpo.includes(',') && limpo.includes('.')) {
+                limpo = limpo.replace(/\./g, '').replace(',', '.');
+            } else { limpo = limpo.replace(',', '.'); }
+            return parseFloat(limpo) || 0;
+        }
+
+        // MARCAR COMO PAGO
+        function marcarComoPago(id) {
+            let db = JSON.parse(localStorage.getItem('vitraclip_scans') || "[]");
+            db = db.map(item => {
+                if(item.id === id) item.status = 'pago';
+                return item;
+            });
+            localStorage.setItem('vitraclip_scans', JSON.stringify(db));
+            renderPagar();
+        }
+
+        // EXCLUIR DEFINITIVAMENTE
+        function excluirItem(id) {
+            if(confirm("Tem certeza que deseja excluir este registro?")) {
+                let db = JSON.parse(localStorage.getItem('vitraclip_scans') || "[]");
+                db = db.filter(item => item.id !== id);
+                localStorage.setItem('vitraclip_scans', JSON.stringify(db));
+                renderPagar();
+            }
+        }
+
+        function renderPagar() {
+            const db = JSON.parse(localStorage.getItem('vitraclip_scans') || "[]");
+            const container = document.getElementById('lista-pagar');
+            const totalPendenteEl = document.getElementById('total-pendente');
+            const btnVerTudo = document.getElementById('btn-ver-tudo');
+            
+            container.innerHTML = '';
+            let acumuladoPendente = 0;
+
+            // Filtra apenas DESPESAS que NÃO estão pagas para a lista principal
+            const pendentes = db.filter(item => item.fluxo !== 'Receita' && item.status !== 'pago');
+            
+            // Calcula o total apenas do que não foi pago
+            pendentes.forEach(item => {
+                acumuladoPendente += cleanVal(item.valor);
+            });
+
+            const limite = 10;
+            const itensParaExibir = mostrarTodos ? pendentes : pendentes.slice(0, limite);
+
+            if (pendentes.length === 0) {
+                container.innerHTML = '<p style="color:var(--text); text-align:center; padding:40px;">Tudo em dia! Nenhuma conta pendente.</p>';
+            }
+
+            itensParaExibir.forEach(item => {
+                const valorNum = cleanVal(item.valor);
+
+                container.innerHTML += `
+                    <div class="a-row">
+                        <div>
+                            <div style="display:flex; align-items:center;">
+                                <span style="font-weight:700; font-size:16px;">${item.empresa}</span>
+                                <span class="status-badge bg-pendente">Aguardando</span>
+                            </div>
+                            <div style="font-size:12px; color:var(--text); margin-top:5px;">Vencimento: ${item.data} • ${item.categoria}</div>
+                            
+                            <div class="actions">
+                                <button class="btn-action btn-pay" onclick="marcarComoPago(${item.id})">
+                                    <i data-lucide="check-circle" size="14"></i> Baixar Pago
+                                </button>
+                                <button class="btn-action btn-delete" onclick="excluirItem(${item.id})">
+                                    <i data-lucide="trash-2" size="14"></i> Excluir
+                                </button>
+                            </div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-weight:800; color:white; font-size:20px;">R$ ${valorNum.toLocaleString('pt-BR', {minimumFractionDigits:2})}</div>
+                            <div style="font-size:11px; color:var(--primary); margin-top:5px; font-weight:700;">${item.tipo}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            if (pendentes.length > limite && !mostrarTodos) {
+                btnVerTudo.style.display = 'block';
+                btnVerTudo.innerText = `Ver todas as ${pendentes.length} pendências`;
+            } else { btnVerTudo.style.display = 'none'; }
+
+            totalPendenteEl.innerText = acumuladoPendente.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
+            lucide.createIcons();
+        }
+
+        document.getElementById('btn-ver-tudo').onclick = () => {
+            mostrarTodos = true;
+            renderPagar();
+        };
+
+        window.onload = renderPagar;
+    </script>
+</body>
+</html>

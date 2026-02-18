@@ -6,6 +6,7 @@
     <title>Vitraclip | Vision Neural</title>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     <style>
         :root { 
             --primary: #255fff; 
@@ -128,85 +129,197 @@
         </div>
     </div>
     <canvas id="output-canvas" style="display:none;"></canvas>
-    <script>
-        lucide.createIcons();
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('output-canvas');
-        const processing = document.getElementById('ia-processing');
-        let worker = null;
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
-        async function loadIA() {
-            worker = await Tesseract.createWorker('por');
-        }
-        loadIA();
+<script>
+    lucide.createIcons();
 
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 1920 } } })
-            .then(stream => video.srcObject = stream);
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('output-canvas');
+    const processing = document.getElementById('ia-processing');
+    let worker = null;
 
-        document.getElementById('capture-btn').onclick = () => runAI(video);
+    // Configuração do Worker do PDF.js
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-        document.getElementById('upload-input').onchange = (e) => {
+    async function loadIA() {
+        worker = await Tesseract.createWorker('por');
+        // Parâmetros focados em documentos comerciais
+        await worker.setParameters({
+            tessedit_char_whitelist: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz/.,-:$ ',
+            tessedit_pageseg_mode: '1', // Tenta achar blocos de texto automaticamente
+        });
+    }
+
+    loadIA();
+
+    // Iniciar Câmera
+    navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: 'environment', width: { ideal: 1920 } } 
+    }).then(stream => video.srcObject = stream);
+
+    // Evento de Captura pela Câmera
+    document.getElementById('capture-btn').onclick = () => runAI(video);
+
+    // Configuração do Upload (Imagens e PDF)
+    const uploadInput = document.getElementById('upload-input');
+    uploadInput.setAttribute('accept', 'image/*,.pdf');
+
+    uploadInput.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (file.type === "application/pdf") { 
+            processPDF(file); 
+        } else {
             const reader = new FileReader();
             reader.onload = (ev) => {
                 const img = new Image();
                 img.onload = () => runAI(img);
                 img.src = ev.target.result;
             };
-            reader.readAsDataURL(e.target.files[0]);
-        };
+            reader.readAsDataURL(file);
+        }
+    };
 
-        async function runAI(source) {
-            processing.style.display = 'flex';
-            const ctx = canvas.getContext('2d');
-            canvas.width = source.videoWidth || source.width;
-            canvas.height = source.videoHeight || source.height;
-            ctx.filter = 'contrast(2.5) grayscale(1) brightness(1.0)';
-            ctx.drawImage(source, 0, 0);
+    // Filtro de Nitidez para fotos da câmera
+    function refineImage(ctx, width, height) {
+        ctx.globalCompositeOperation = 'contrast';
+        ctx.filter = 'contrast(1.4) brightness(1.1) saturate(0)'; 
+        ctx.drawImage(canvas, 0, 0);
+        ctx.globalCompositeOperation = 'source-over';
+    }
+
+    // Processamento de PDF: Converte a primeira página em imagem para o OCR
+    async function processPDF(file) {
+        processing.style.display = 'flex';
+        const reader = new FileReader();
+        reader.onload = async function() {
             try {
-                const { data: { text } } = await worker.recognize(canvas.toDataURL('image/jpeg'));
-                extractData(text);
+                const typedarray = new Uint8Array(this.result);
+                const pdf = await pdfjsLib.getDocument(typedarray).promise;
+                const page = await pdf.getPage(1);
+
+                // Escala de 2.5 para garantir que letras pequenas do boleto fiquem nítidas
+                const viewport = page.getViewport({ scale: 2.5 }); 
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+                const ctx = canvas.getContext('2d');
+
+                await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+
+                // Envia o canvas renderizado para a IA
+                runAI(canvas, true);
             } catch (err) {
-                alert("Erro ao processar.");
+                console.error("Erro ao processar PDF:", err);
                 processing.style.display = 'none';
+                alert("Erro ao ler o arquivo PDF.");
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+    // Motor de Execução da IA (OCR)
+    async function runAI(source, isPDF = false) {
+        processing.style.display = 'flex';
+        const ctx = canvas.getContext('2d');
+        
+        // Ajusta dimensões do canvas baseada na origem
+        canvas.width = source.videoWidth || source.width;
+        canvas.height = source.videoHeight || source.height;
+
+        if (!isPDF) {
+            ctx.drawImage(source, 0, 0);
+            refineImage(ctx, canvas.width, canvas.height);
+        } else {
+            // Se for PDF, o canvas já está pronto e desenhado
+            ctx.drawImage(source, 0, 0);
+        }
+
+        try {
+            const { data: { text } } = await worker.recognize(canvas);
+            if (!text || text.trim().length < 5) throw new Error("Leitura fraca");
+            extractData(text);
+        } catch (err) {
+            console.error("Erro OCR:", err);
+            // Fallback: Tenta ler sem filtro caso a imagem esteja muito escura/clara
+            ctx.filter = 'none';
+            ctx.drawImage(source, 0, 0);
+            const { data: { text } } = await worker.recognize(canvas);
+            extractData(text);
+        }
+    }
+
+    // Lógica de Extração de Dados (Sua lógica original)
+    function extractData(raw) {
+        const text = raw.toUpperCase();
+        
+        // Extração de Valor
+        const valorRegex = /\d{1,3}(?:\.\d{3})*,\d{2}/g;
+        const matches = text.match(valorRegex) || [];
+        const numVals = matches.map(v => parseFloat(v.replace(/\./g, '').replace(',', '.'))).filter(n => n > 2.0);
+        
+        const valorFinal = numVals.length > 0 ? Math.max(...numVals) : 0;
+        const valorOriginalStr = matches[numVals.indexOf(valorFinal)] || "0,00";
+
+        // Extração de Data
+        const dataRegex = /\d{2}\/\d{2}\/\d{4}/g;
+        const dates = text.match(dataRegex) || [];
+        const vencimento = dates.length > 0 ? dates[dates.length - 1] : new Date().toLocaleDateString();
+
+        // Identificação de Empresa/Fluxo
+        const userData = JSON.parse(localStorage.getItem('vitraclip_user_data')) || {};
+        const minhaEmpresa = (userData.empresa || "").toUpperCase();
+        
+        let fluxo = "Despesa";
+        let categoria = "Geral";
+        let docType = "Boleto Comercial";
+
+        if (minhaEmpresa && text.includes(minhaEmpresa)) {
+            fluxo = "Receita";
+            categoria = "Faturamento";
+        }
+
+        // Categorização por Palavras-Chave
+        const setores = [
+            { n: "Energia", k: ["KWH", "LUZ", "ENEL", "CPFL", "LIGHT", "COPEL", "EQUATORIAL"] },
+            { n: "Água", k: ["M3", "AGUA", "SABESP", "COPASA", "SANEPAR", "CEDAE"] },
+            { n: "Internet", k: ["VIVO", "CLARO", "TIM", "OI FIBRA", "TELECOM", "NET S.A"] },
+            { n: "Impostos", k: ["DARF", "DAS ", "FGTS", "SIMPLES", "PREFEITURA"] }
+        ];
+
+        for (let s of setores) {
+            if (s.k.some(key => text.includes(key))) {
+                categoria = s.n;
+                docType = `Fatura ${s.n}`;
+                break;
             }
         }
 
-        function extractData(raw) {
-            const text = raw.toUpperCase();
-            let brain = JSON.parse(localStorage.getItem('vitraclip_brain')) || {};
-            
-            const valorRegex = /\d{1,3}(?:\.\d{3})*,\d{2}/g;
-            const dataRegex = /\d{2}\/\d{2}\/\d{4}/g;
-            
-            const vals = text.match(valorRegex) || [];
-            const dates = text.match(dataRegex) || [];
+        const linhas = raw.split('\n').filter(l => l.trim().length > 3);
+        const emissor = fluxo === "Receita" ? "Venda Cliente" : (linhas[0] || "Desconhecido");
 
-            let docType = "Boleto Geral";
-            if (text.includes("ENEL")) docType = "Conta Enel";
-            if (text.includes("CAIXA")) docType = "Boleto Caixa";
-            if (text.includes("BRADESCO")) docType = "Boleto Bradesco";
+        // Objeto de Resultado
+        const novoScan = {
+            id: Date.now(),
+            empresa: emissor.substring(0, 30),
+            tipo: docType,
+            categoria: categoria,
+            valor: valorFinal,
+            valorFormatado: "R$ " + valorOriginalStr,
+            fluxo: fluxo,
+            data: vencimento,
+            dataScan: new Date().toLocaleDateString(),
+            status: 'pendente' // Adicionado para manter sincronia com suas novas telas
+        };
 
-            // CORREÇÃO DOS VALORES BUGADOS: 
-            // Pega a string "1.250,00", remove ponto e troca vírgula por ponto para virar número real
-            const valorRaw = vals.length > 0 ? vals[vals.length - 1] : "0,00";
-            const valorNumerico = parseFloat(valorRaw.replace(/\./g, '').replace(',', '.'));
+        // Salvar e Redirecionar
+        const db = JSON.parse(localStorage.getItem('vitraclip_scans')) || [];
+        db.unshift(novoScan);
+        localStorage.setItem('vitraclip_scans', JSON.stringify(db));
 
-            const novoScan = {
-                id: Date.now(),
-                empresa: docType,
-                tipo: docType, // Adicionado para compatibilidade com a tabela do dash
-                valor: valorNumerico, // SALVA COMO NÚMERO PARA NÃO BUGAR O DASHBOARD
-                valorFormatado: "R$ " + valorRaw, // Para uso visual se necessário
-                data: dates.length > 0 ? dates[0] : new Date().toLocaleDateString(),
-                dataScan: new Date().toLocaleDateString()
-            };
-
-            const db = JSON.parse(localStorage.getItem('vitraclip_scans')) || [];
-            db.unshift(novoScan);
-            localStorage.setItem('vitraclip_scans', JSON.stringify(db));
-
-            window.location.href = 'dashboard.html';
-        }
-    </script>
+        window.location.href = 'dashboard.html';
+    }
+</script>
 </body>
 </html>

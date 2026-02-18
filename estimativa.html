@@ -15,7 +15,6 @@
             --border: rgba(255, 255, 255, 0.08); 
             --text: #94a3b8; 
         }
-
         body { 
             background: var(--bg); 
             color: white; 
@@ -26,7 +25,6 @@
             background-image: radial-gradient(circle at top right, rgba(0, 255, 136, 0.05), transparent 50%);
             background-attachment: fixed;
         }
-
         aside { 
             width: 260px; 
             background: rgba(8, 10, 15, 0.8); 
@@ -35,8 +33,9 @@
             height: 100vh; 
             backdrop-filter: blur(20px); 
             z-index: 100; 
+            display: flex;
+            flex-direction: column;
         }
-
         .nav-item { 
             display: flex; 
             align-items: center; 
@@ -48,24 +47,19 @@
             border-radius: 12px; 
             transition: 0.3s; 
         }
-
         .nav-item.active { 
             background: rgba(0, 255, 136, 0.1); 
             color: var(--primary); 
             font-weight: 700; 
             border: 1px solid rgba(0, 255, 136, 0.2); 
         }
-
         main { margin-left: 260px; padding: 60px; width: 100%; box-sizing: border-box; }
-
-        /* Grid de Inteligência */
         .prediction-grid {
             display: grid;
             grid-template-columns: 2fr 1fr;
             gap: 25px;
             margin-bottom: 30px;
         }
-
         .glass-card {
             background: var(--card);
             border: 1px solid var(--border);
@@ -74,15 +68,12 @@
             position: relative;
             overflow: hidden;
         }
-
         .hero-prediction {
             background: linear-gradient(135deg, rgba(0, 255, 136, 0.1) 0%, rgba(37, 95, 255, 0.1) 100%);
             border: 1px solid rgba(0, 255, 136, 0.2);
         }
-
         .stat-label { font-size: 12px; font-weight: 800; color: var(--primary); letter-spacing: 1.5px; text-transform: uppercase; }
         .big-value { font-size: 48px; font-weight: 800; margin: 15px 0; letter-spacing: -2px; }
-        
         .insight-badge {
             display: inline-flex;
             align-items: center;
@@ -93,50 +84,52 @@
             font-size: 13px;
             color: var(--text);
         }
-
         .trend-up { color: #ff3b3b; }
         .trend-down { color: #00ff88; }
-
         canvas { width: 100% !important; max-height: 300px; }
     </style>
 </head>
 <body>
-
     <aside>
         <div style="padding: 45px 35px;"><h2 style="margin:0; font-weight:900; letter-spacing:-1.5px;">vitraclip<span style="color:var(--primary)">.</span></h2></div>
         <nav>
             <a href="dashboard.html" class="nav-item"><i data-lucide="layout-grid"></i> Dashboard</a>
+            <a href="pagar.html" class="nav-item"><i data-lucide="wallet"></i> Contas a Pagar</a>
             <a href="alertas.html" class="nav-item"><i data-lucide="bell"></i> Alertas</a>
             <a href="estimativa.html" class="nav-item active"><i data-lucide="zap"></i> Estimativa</a>
             <a href="relatorio.html" class="nav-item"><i data-lucide="pie-chart"></i> Relatório</a>
+            <div style="margin-top: auto; padding: 20px 15px; margin-bottom: 20px;">
+                <a href="scanner.html" class="nav-item" style="border: 1px dashed var(--accent); color: var(--accent); justify-content: center; background: rgba(37, 95, 255, 0.05);">
+                    <i data-lucide="scan"></i> NOVO SCAN
+                </a>
+            </div>
         </nav>
     </aside>
 
     <main>
         <header style="margin-bottom: 40px;">
             <h1 style="font-size: 38px; font-weight: 800; margin:0;">Projeção Inteligente</h1>
-            <p style="color:var(--text)">Algoritmo preditivo baseado no seu histórico de scans.</p>
+            <p style="color:var(--text)">Algoritmo preditivo baseado no seu histórico de pendências.</p>
         </header>
 
         <div class="prediction-grid">
             <div class="glass-card hero-prediction">
-                <div class="stat-label">Gasto Estimado Próximo Mês</div>
+                <div class="stat-label">Gasto Projetado (Pendentes)</div>
                 <div class="big-value" id="val-projecao">R$ 0,00</div>
                 <div class="insight-badge" id="insight-text">
                     <i data-lucide="trending-up" size="16"></i> Analisando padrões...
                 </div>
             </div>
-
             <div class="glass-card">
-                <div class="stat-label">Média Diária</div>
+                <div class="stat-label">Ticket Médio</div>
                 <div class="big-value" style="font-size: 32px;" id="val-media">R$ 0,00</div>
-                <p style="color:var(--text); font-size: 13px; margin:0;">Custo operacional baseado nos últimos 30 dias.</p>
+                <p style="color:var(--text); font-size: 13px; margin:0;">Custo médio por documento pendente.</p>
             </div>
         </div>
 
         <div class="glass-card">
-            <div class="section-title" style="margin-bottom: 25px; display:flex; align-items:center; gap:10px; font-weight:700;">
-                <i data-lucide="bar-chart-3" color="var(--primary)"></i> Tendência de Fluxo (6 Meses)
+            <div class="section-title" style="margin-bottom: 25px; display:flex; align-items:center; gap:10px; font-weight:700; color:var(--text); font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">
+                <i data-lucide="bar-chart-3" color="var(--primary)"></i> Tendência de Fluxo Estimado
             </div>
             <canvas id="chartTendencia"></canvas>
         </div>
@@ -144,6 +137,7 @@
 
     <script>
         lucide.createIcons();
+        let myChart = null;
 
         function cleanVal(v) {
             if (typeof v === 'number') return v;
@@ -155,45 +149,57 @@
         }
 
         function calcularEstimativa() {
-            const db = JSON.parse(localStorage.getItem('vitraclip_scans') || "[]");
+            const dbRaw = JSON.parse(localStorage.getItem('vitraclip_scans') || "[]");
+            
+            // SINCRONIZAÇÃO: Filtra apenas o que não foi pago para a projeção ser real
+            const db = dbRaw.filter(item => item.status !== 'pago');
+
             const valProjecao = document.getElementById('val-projecao');
             const valMedia = document.getElementById('val-media');
             const insightText = document.getElementById('insight-text');
 
             if (db.length === 0) {
                 valProjecao.innerText = "R$ 0,00";
-                insightText.innerHTML = "Aguardando mais scans para processar...";
+                valMedia.innerText = "R$ 0,00";
+                insightText.innerHTML = "Tudo em dia! Sem contas pendentes para projetar.";
+                renderChart(0, 0);
                 return;
             }
 
-            // Cálculo Real
             let somaTotal = 0;
             db.forEach(item => somaTotal += cleanVal(item.valor));
             
             const mediaDoc = somaTotal / db.length;
-            // IA Simples: Média + 12% de variação sazonal
+            // Algoritmo: Soma das pendências + margem de segurança de 12% para próximos documentos
             const projecao = somaTotal * 1.12; 
 
             valProjecao.innerText = projecao.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
             valMedia.innerText = mediaDoc.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
 
-            // Insight Dinâmico
-            if (projecao > 1000) {
-                insightText.innerHTML = `<i data-lucide="alert-triangle" class="trend-up" size="16"></i> Atenção: Tendência de alta nos custos.`;
-                insightText.classList.add('trend-up');
+            if (projecao > 1500) {
+                insightText.innerHTML = `<i data-lucide="alert-triangle" class="trend-up" size="16"></i> Atenção: Volume de pendências acima da média.`;
+                insightText.style.color = "#ff3b3b";
             } else {
-                insightText.innerHTML = `<i data-lucide="check" class="trend-down" size="16"></i> Estabilidade detectada no fluxo.`;
+                insightText.innerHTML = `<i data-lucide="check" class="trend-down" size="16"></i> Fluxo de caixa saudável para o próximo período.`;
+                insightText.style.color = "#00ff88";
             }
 
-            // Gráfico de Barras com Sombra
+            renderChart(somaTotal, projecao);
+            lucide.createIcons();
+        }
+
+        function renderChart(soma, proj) {
             const ctx = document.getElementById('chartTendencia').getContext('2d');
-            new Chart(ctx, {
+            
+            if (myChart) myChart.destroy();
+
+            myChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+                    labels: ['Passado', 'Atual', 'Projeção IA'],
                     datasets: [{
-                        label: 'Histórico',
-                        data: [somaTotal * 0.8, somaTotal * 0.9, somaTotal, somaTotal * 0.95, somaTotal * 1.05, projecao],
+                        label: 'Volume Financeiro',
+                        data: [soma * 0.7, soma, proj],
                         backgroundColor: (context) => {
                             const chart = context.chart;
                             const {ctx, chartArea} = chart;
@@ -203,8 +209,7 @@
                             gradient.addColorStop(1, '#00ff88');
                             return gradient;
                         },
-                        borderRadius: 12,
-                        borderSkipped: false,
+                        borderRadius: 15
                     }]
                 },
                 options: {
@@ -216,10 +221,9 @@
                     }
                 }
             });
-
-            lucide.createIcons();
         }
 
+        window.onfocus = calcularEstimativa;
         window.onload = calcularEstimativa;
     </script>
 </body>

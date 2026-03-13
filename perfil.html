@@ -2,75 +2,124 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Vitraclip | Perfil</title>
+    <title>Vitraclip | Perfil & Sincronia</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        :root { --primary: #255fff; --bg: #05070a; --card: rgba(255, 255, 255, 0.03); --border: rgba(255, 255, 255, 0.08); --text: #94a3b8; }
-        body { background: var(--bg); color: white; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; display: flex; min-height: 100vh; }
+        :root { 
+            --primary: #255fff; 
+            --primary-glow: rgba(37, 95, 255, 0.2);
+            --bg: #05070a; 
+            --card: rgba(255, 255, 255, 0.03); 
+            --border: rgba(255, 255, 255, 0.08); 
+            --text: #94a3b8; 
+            --red: #ff3b3b;
+            --green: #00ff88;
+        }
         
+        body { background: var(--bg); color: white; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; display: flex; min-height: 100vh; overflow-x: hidden; }
+        
+        /* Sidebar Sincronizada */
         aside { width: 260px; background: rgba(8, 10, 15, 0.7); border-right: 1px solid var(--border); position: fixed; height: 100vh; backdrop-filter: blur(20px); z-index: 100; display: flex; flex-direction: column; }
-        .nav-item { display: flex; align-items: center; gap: 12px; padding: 14px 20px; color: var(--text); text-decoration: none; margin: 5px 15px; border-radius: 12px; transition: 0.3s; }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 14px 20px; color: var(--text); text-decoration: none; margin: 5px 15px; border-radius: 12px; transition: 0.3s; font-size: 14px; }
+        .nav-item:hover { background: rgba(255,255,255,0.05); color: white; }
         .nav-item.active { background: rgba(37, 95, 255, 0.1); color: var(--primary); font-weight: 700; border: 1px solid rgba(37, 95, 255, 0.2); }
         
-        main { margin-left: 260px; padding: 60px; width: 100%; }
-        .profile-card { background: var(--card); border: 1px solid var(--border); border-radius: 32px; padding: 40px; max-width: 800px; }
-        .profile-header { display: flex; align-items: center; gap: 25px; margin-bottom: 40px; border-bottom: 1px solid var(--border); padding-bottom: 30px; }
-        .avatar { width: 80px; height: 80px; background: var(--primary); border-radius: 24px; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 800; box-shadow: 0 10px 20px rgba(37, 95, 255, 0.2); }
+        main { margin-left: 260px; padding: 60px; width: calc(100% - 260px); box-sizing: border-box; }
+        
+        /* Profile Card */
+        .profile-card { background: var(--card); border: 1px solid var(--border); border-radius: 32px; padding: 40px; max-width: 800px; backdrop-filter: blur(10px); }
+        .profile-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px; border-bottom: 1px solid var(--border); padding-bottom: 30px; }
+        .user-meta { display: flex; align-items: center; gap: 25px; }
+        
+        .avatar { width: 80px; height: 80px; background: var(--primary); border-radius: 24px; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 800; box-shadow: 0 10px 20px var(--primary-glow); }
         
         .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
         .info-group label { display: block; color: var(--text); font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; }
         .info-group p { margin: 0; font-size: 18px; font-weight: 600; }
-        .badge-status { display: inline-block; margin-top: 10px; padding: 6px 12px; background: rgba(0, 255, 136, 0.1); color: #00ff88; border-radius: 8px; font-size: 12px; font-weight: 700; }
+        
+        .badge-status { display: inline-block; margin-top: 10px; padding: 6px 12px; background: rgba(0, 255, 136, 0.1); color: var(--green); border-radius: 8px; font-size: 12px; font-weight: 700; }
+        
+        .btn-edit { background: transparent; border: 1px solid var(--border); color: white; padding: 10px 20px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.3s; font-family: inherit; font-size: 13px;}
+        .btn-edit:hover { background: white; color: black; }
+
+        /* Botão Novo Scan */
+        .btn-scan-sidebar { border: 1px dashed var(--green) !important; color: var(--green) !important; justify-content: center !important; background: rgba(0, 255, 136, 0.05) !important; margin-top: 20px !important; font-weight: 800; }
     </style>
 </head>
 <body>
     <aside>
-        <div style="padding: 45px 35px;"><h2 style="margin:0; font-weight:900; letter-spacing:-1.5px;">vitraclip<span style="color:var(--primary)">.</span></h2></div>
+        <div style="padding: 45px 35px;"><h2 style="margin:0; font-weight:900; letter-spacing:-1.5px;">vitraclip<span style="color:var(--red)">.</span></h2></div>
         <nav>
             <a href="dashboard.html" class="nav-item"><i data-lucide="layout-grid"></i> Dashboard</a>
+            <a href="pagar.html" class="nav-item"><i data-lucide="wallet"></i> Contas a Pagar</a>
             <a href="alertas.html" class="nav-item"><i data-lucide="bell"></i> Alertas</a>
+            <a href="tabela.html" class="nav-item"><i data-lucide="layers"></i> Intelligence Sheet</a>
             <a href="estimativa.html" class="nav-item"><i data-lucide="zap"></i> Estimativa</a>
             <a href="relatorio.html" class="nav-item"><i data-lucide="pie-chart"></i> Relatório</a>
             <a href="perfil.html" class="nav-item active"><i data-lucide="user"></i> Perfil</a>
+            
+            <a href="scanner.html" class="nav-item btn-scan-sidebar">
+                <i data-lucide="scan"></i> NOVO SCAN
+            </a>
         </nav>
     </aside>
 
     <main>
+        <header style="margin-bottom: 40px;">
+            <h1 style="font-size: 32px; font-weight: 800; margin: 0;">Configurações de Perfil</h1>
+            <p style="color: var(--text); margin-top: 5px;">Gerencie seus dados e sincronize entre dispositivos.</p>
+        </header>
+
         <div class="profile-card">
             <div class="profile-header">
-                <div class="avatar" id="avatar-char">U</div>
-                <div>
-                    <h2 id="view-nome" style="margin:0; font-size: 28px;">Nome do Usuário</h2>
-                    <span class="badge-status">Conta Vision Neural Ativa</span>
+                <div class="user-meta">
+                    <div class="avatar" id="avatar-char">U</div>
+                    <div>
+                        <h2 id="view-nome" style="margin:0; font-size: 28px;">Usuário</h2>
+                        <span class="badge-status">Conta Vision Neural Ativa</span>
+                    </div>
                 </div>
+                <button class="btn-edit" onclick="window.location.href='index.html'">
+                    <i data-lucide="edit-3" size="18"></i> Reiniciar Setup
+                </button>
             </div>
 
             <div class="info-grid">
                 <div class="info-group">
                     <label>E-mail Profissional</label>
-                    <p id="view-email">email@exemplo.com</p>
+                    <p id="view-email">---</p>
                 </div>
                 <div class="info-group">
                     <label>WhatsApp / Telefone</label>
-                    <p id="view-tel">(00) 00000-0000</p>
+                    <p id="view-tel">---</p>
                 </div>
                 <div class="info-group">
                     <label>Empresa / Loja</label>
-                    <p id="view-empresa">Nome da Empresa</p>
+                    <p id="view-empresa">---</p>
                 </div>
                 <div class="info-group">
                     <label>Nicho de Atuação</label>
-                    <p id="view-nicho">Nicho</p>
+                    <p id="view-nicho">---</p>
                 </div>
                 <div class="info-group">
                     <label>Membro desde</label>
-                    <p id="view-data">17 de Fevereiro, 2026</p>
+                    <p id="view-data">Fevereiro, 2026</p>
                 </div>
                 <div class="info-group">
-                    <label>ID de Segurança</label>
-                    <p style="font-family: monospace; font-size: 14px; color: var(--primary);">VC-9982X-2026</p>
+                    <label>Backup e Sincronia</label>
+                    <p style="font-size: 12px; color: var(--text); font-weight: 400; margin-top: 5px;">Mova seus dados para outro celular:</p>
                 </div>
+            </div>
+
+            <div style="margin-top: 30px; padding-top: 30px; border-top: 1px solid var(--border); display: flex; gap: 15px;">
+                <button onclick="exportData()" class="btn-edit" style="border-color: var(--primary); color: var(--primary); background: rgba(37, 95, 255, 0.05);">
+                    <i data-lucide="download"></i> Gerar Arquivo de Sincronia
+                </button>
+                <button onclick="document.getElementById('importFile').click()" class="btn-edit" style="border-color: var(--green); color: var(--green); background: rgba(0, 255, 136, 0.05);">
+                    <i data-lucide="upload"></i> Importar Dados de Outro Celular
+                </button>
+                <input type="file" id="importFile" style="display:none" onchange="importData(event)" accept=".json">
             </div>
         </div>
     </main>
@@ -82,14 +131,53 @@
             const data = JSON.parse(localStorage.getItem('vitraclip_user_data'));
 
             if (data) {
-                document.getElementById('view-nome').innerText = data.nome;
-                document.getElementById('view-email').innerText = data.email;
-                document.getElementById('view-tel').innerText = data.telefone;
-                document.getElementById('view-empresa').innerText = data.empresa;
-                document.getElementById('view-nicho').innerText = data.nicho;
-                document.getElementById('view-data').innerText = data.dataAdesao;
-                document.getElementById('avatar-char').innerText = data.nome.charAt(0).toUpperCase();
+                document.getElementById('view-nome').innerText = data.nome || "Usuário";
+                document.getElementById('view-email').innerText = data.email || "Não informado";
+                document.getElementById('view-tel').innerText = data.telefone || "Não informado";
+                document.getElementById('view-empresa').innerText = data.empresa || "Não informada";
+                document.getElementById('view-nicho').innerText = data.nicho || "Geral";
+                document.getElementById('view-data').innerText = data.dataAdesao || "Fevereiro, 2026";
+                
+                const initials = data.nome ? data.nome.charAt(0).toUpperCase() : "U";
+                document.getElementById('avatar-char').innerText = initials;
             }
+        }
+
+        // --- LÓGICA DE EXPORTAÇÃO (PARA MOVER ENTRE CELULARES) ---
+        function exportData() {
+            const backup = {
+                user_data: JSON.parse(localStorage.getItem('vitraclip_user_data')),
+                scans: JSON.parse(localStorage.getItem('vitraclip_scans')),
+                intel_sheet: JSON.parse(localStorage.getItem('vitraclip_intel_sheet'))
+            };
+            
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backup));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "vitraclip_sincronia_2026.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+            alert("Arquivo gerado! Agora envie este arquivo para o outro celular.");
+        }
+
+        // --- LÓGICA DE IMPORTAÇÃO ---
+        function importData(event) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if(imported.user_data) localStorage.setItem('vitraclip_user_data', JSON.stringify(imported.user_data));
+                    if(imported.scans) localStorage.setItem('vitraclip_scans', JSON.stringify(imported.scans));
+                    if(imported.intel_sheet) localStorage.setItem('vitraclip_intel_sheet', JSON.stringify(imported.intel_sheet));
+                    
+                    alert("Dados sincronizados com sucesso! Reiniciando...");
+                    location.reload();
+                } catch(err) {
+                    alert("Erro: Arquivo de sincronia inválido.");
+                }
+            };
+            reader.readAsText(event.target.files[0]);
         }
 
         window.onload = loadProfile;

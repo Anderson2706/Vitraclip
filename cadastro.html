@@ -18,6 +18,7 @@
                 radial-gradient(circle at 90% 80%, rgba(37, 95, 255, 0.1), transparent 40%);
         }
 
+        /* Logo no topo do Card */
         .logo-area { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 30px; }
         .logo-dot { width: 14px; height: 14px; background: var(--primary); border-radius: 3px; transform: rotate(45deg); box-shadow: 0 0 20px var(--primary); }
         .logo-text { font-weight: 800; letter-spacing: -1px; font-size: 1.2rem; }
@@ -47,7 +48,6 @@
             background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
             border-radius: 14px; color: white; font-size: 0.95rem; outline: none; transition: 0.3s;
         }
-
         input:focus, select:focus { border-color: var(--primary); background: rgba(37, 95, 255, 0.05); }
 
         .btn-row { display: flex; gap: 12px; margin-top: 30px; }
@@ -63,6 +63,7 @@
     </style>
 </head>
 <body>
+
     <div class="reg-card">
         <div class="logo-area">
             <div class="logo-dot"></div>
@@ -80,6 +81,7 @@
         <div class="step active" id="step1">
             <h2>Perfil Pessoal</h2>
             <p class="subtitle">Como devemos chamar você?</p>
+            
             <div class="input-group">
                 <i data-lucide="user" size="18"></i>
                 <input type="text" id="userName" placeholder="Seu nome completo">
@@ -90,7 +92,7 @@
             </div>
             <div class="input-group">
                 <i data-lucide="phone" size="18"></i>
-                <input type="text" id="userPhone" placeholder="WhatsApp / Telefone">
+                <input type="text" placeholder="WhatsApp / Telefone">
             </div>
             <button class="btn btn-next" onclick="goTo(2)">Continuar <i data-lucide="arrow-right" size="18"></i></button>
         </div>
@@ -98,6 +100,7 @@
         <div class="step" id="step2">
             <h2>Dados da Empresa</h2>
             <p class="subtitle">Informações para otimizar seu estoque.</p>
+            
             <div class="input-group">
                 <i data-lucide="briefcase" size="18"></i>
                 <input type="text" id="companyName" placeholder="Nome da Loja ou Empresa">
@@ -114,13 +117,14 @@
             </div>
             <div class="input-group">
                 <i data-lucide="bar-chart" size="18"></i>
-                <select id="volume">
+                <select>
                     <option value="">Volume de itens atual</option>
                     <option>0 - 50 itens</option>
                     <option>51 - 500 itens</option>
                     <option>Mais de 500</option>
                 </select>
             </div>
+
             <div class="btn-row">
                 <button class="btn btn-prev" onclick="goTo(1)">Voltar</button>
                 <button class="btn btn-next" onclick="goTo(3)">Próximo</button>
@@ -130,6 +134,7 @@
         <div class="step" id="step3">
             <h2>Segurança</h2>
             <p class="subtitle">Finalize sua chave de acesso segura.</p>
+            
             <div class="input-group">
                 <i data-lucide="lock" size="18"></i>
                 <input type="password" placeholder="Senha de acesso">
@@ -138,6 +143,7 @@
                 <i data-lucide="shield-check" size="18"></i>
                 <input type="password" placeholder="Confirmar senha">
             </div>
+
             <div class="btn-row">
                 <button class="btn btn-prev" onclick="goTo(2)">Voltar</button>
                 <button class="btn btn-next" onclick="finish()">Concluir Registro <i data-lucide="check" size="18"></i></button>
@@ -153,13 +159,18 @@
         lucide.createIcons();
 
         function goTo(step) {
+            // Esconde todas as etapas
             document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            
+            // Ativa a etapa atual
             const currentStep = document.getElementById('step' + step);
             currentStep.classList.add('active');
 
+            // Atualiza a Barra de Progresso
             document.getElementById('p2').classList.toggle('active', step >= 2);
             document.getElementById('p3').classList.toggle('active', step >= 3);
 
+            // Animação de entrada
             gsap.from(currentStep, { 
                 opacity: 0, 
                 y: 10, 
@@ -168,27 +179,29 @@
             });
         }
 
-   function finish() {
-    const senha = document.querySelectorAll('input[type="password"]')[0].value;
-    
-    // Criamos o JSON completo aqui
+  function finish() {
+    // Captura TODOS os dados preenchidos
     const userObj = {
-        nome: document.getElementById('userName').value,
-        email: document.getElementById('userEmail').value.toLowerCase().trim(),
-        telefone: document.getElementById('userPhone').value,
-        empresa: document.getElementById('companyName').value,
-        nicho: document.getElementById('niche').value,
-        senha: senha,
-        dataAdesao: new Date().toLocaleDateString('pt-BR')
+        nome: document.getElementById('userName').value || 'Usuário',
+        email: document.getElementById('userEmail').value || 'Não informado',
+        // Como o telefone não tem ID no seu HTML, pegamos pelo seletor de tipo
+        telefone: document.querySelector('input[placeholder*="WhatsApp"]').value || '(00) 00000-0000',
+        empresa: document.getElementById('companyName').value || 'Minha Empresa',
+        nicho: document.getElementById('niche').value || 'Não definido',
+        dataAdesao: new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })
     };
 
-    // SALVAMENTO: Transformamos o objeto em texto (JSON) e guardamos
+    // Salva o objeto completo
     localStorage.setItem('vitraclip_user_data', JSON.stringify(userObj));
 
-    // Animação de sucesso e redirecionamento
+    // Efeito de transição
     gsap.to(".reg-card", { 
-        opacity: 0, scale: 0.9, duration: 0.5, 
-        onComplete: () => { window.location.href = 'dashboard.html'; }
+        scale: 0.9, 
+        opacity: 0, 
+        duration: 0.5, 
+        onComplete: () => {
+            window.location.href = 'dashboard.html';
+        }
     });
 }
     </script>

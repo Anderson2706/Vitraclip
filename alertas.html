@@ -13,8 +13,8 @@
             --card: rgba(255, 255, 255, 0.03); 
             --border: rgba(255, 255, 255, 0.08); 
             --text: #94a3b8; 
-            --primary: #255fff;
         }
+
         body { 
             background: var(--bg); 
             color: white; 
@@ -25,6 +25,7 @@
             background-image: radial-gradient(circle at top right, rgba(255, 59, 59, 0.08), transparent 50%);
             background-attachment: fixed;
         }
+
         aside { 
             width: 260px; 
             background: rgba(8, 10, 15, 0.8); 
@@ -36,6 +37,7 @@
             display: flex;
             flex-direction: column;
         }
+
         .nav-item { 
             display: flex; 
             align-items: center; 
@@ -47,13 +49,16 @@
             border-radius: 12px; 
             transition: 0.3s; 
         }
+
         .nav-item.active { 
             background: rgba(255, 59, 59, 0.1); 
             color: var(--red); 
             font-weight: 700; 
             border: 1px solid rgba(255, 59, 59, 0.2); 
         }
+
         main { margin-left: 260px; padding: 60px; width: 100%; }
+
         .alert-card {
             background: var(--card);
             border: 1px solid var(--border);
@@ -62,6 +67,7 @@
             margin-bottom: 30px;
             border-left: 5px solid var(--red);
         }
+
         .section-title {
             font-size: 14px;
             text-transform: uppercase;
@@ -72,7 +78,8 @@
             align-items: center;
             gap: 10px;
         }
-        .a-row { 
+
+        .item-row { 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
@@ -82,38 +89,28 @@
             margin-bottom: 12px; 
             border: 1px solid transparent; 
         }
+
         .status-tag {
             padding: 5px 12px;
             border-radius: 8px;
             font-size: 11px;
             font-weight: 800;
         }
+
         .tag-vencido { background: rgba(255, 59, 59, 0.15); color: var(--red); }
         .tag-proximo { background: rgba(255, 149, 0, 0.15); color: var(--orange); }
-        #btn-ver-tudo {
-            display: block; width: 100%; padding: 15px; margin-top: 20px;
-            background: transparent; border: 1px solid var(--border);
-            color: var(--text); border-radius: 15px; cursor: pointer;
-            font-weight: 600; transition: 0.3s;
-        }
+
     </style>
 </head>
 <body>
+
     <aside>
         <div style="padding: 45px 35px;"><h2 style="margin:0; font-weight:900; letter-spacing:-1.5px;">vitraclip<span style="color:var(--red)">.</span></h2></div>
         <nav>
             <a href="dashboard.html" class="nav-item"><i data-lucide="layout-grid"></i> Dashboard</a>
-            <a href="pagar.html" class="nav-item"><i data-lucide="wallet"></i> Contas a Pagar</a>
             <a href="alertas.html" class="nav-item active"><i data-lucide="bell"></i> Alertas</a>
             <a href="estimativa.html" class="nav-item"><i data-lucide="zap"></i> Estimativa</a>
             <a href="relatorio.html" class="nav-item"><i data-lucide="pie-chart"></i> Relatório</a>
-         
-            <a href="tabela.html" class="nav-item">
-    <i data-lucide="layers"></i> Intelligence Sheet</a>
-                <a href="scanner.html" class="nav-item" style="border: 1px dashed var(--primary); color: var(--primary); justify-content: center; background: rgba(37, 95, 255, 0.05);">
-                    <i data-lucide="scan"></i> NOVO SCAN
-                </a>
-            </div>
         </nav>
     </aside>
 
@@ -129,13 +126,12 @@
         </div>
 
         <div class="section-title"><i data-lucide="alert-circle" size="18"></i> Itens Vencidos ou Próximos</div>
-        <div id="lista-alertas"></div>
-        <button id="btn-ver-tudo" style="display: none;">Ver Histórico Completo</button>
+        <div id="lista-alertas">
+            </div>
     </main>
 
     <script>
         lucide.createIcons();
-        let mostrarTodos = false;
 
         function cleanVal(v) {
             if (typeof v === 'number') return v;
@@ -147,55 +143,45 @@
         }
 
         function renderAlertas() {
-            const dbRaw = JSON.parse(localStorage.getItem('vitraclip_scans') || "[]");
+            const db = JSON.parse(localStorage.getItem('vitraclip_scans') || "[]");
             const container = document.getElementById('lista-alertas');
             const totalAtrasadoEl = document.getElementById('total-atrasado');
-            const btnVerTudo = document.getElementById('btn-ver-tudo');
             
-            // SINCRONIZAÇÃO: Filtra apenas o que NÃO está pago
-            const db = dbRaw.filter(item => item.status !== 'pago');
-
-            container.innerHTML = '';
             let acumuladoAtrasado = 0;
             const hoje = new Date();
             hoje.setHours(0, 0, 0, 0);
 
             if (db.length === 0) {
-                container.innerHTML = '<p style="color:var(--text); padding: 20px 0;">Nenhum alerta pendente. Todas as contas estão em dia ou pagas.</p>';
-                totalAtrasadoEl.innerText = "R$ 0,00";
+                container.innerHTML = '<p style="color:var(--text)">Nenhum alerta detectado.</p>';
                 return;
             }
 
-            const alertas = db.filter(item => {
-                const [d, m, y] = item.data.split('/');
-                const vencimento = new Date(y, m - 1, d);
-                const diffTime = vencimento - hoje;
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                
-                if (diffDays < 0) acumuladoAtrasado += cleanVal(item.valor);
-                return diffDays <= 7; 
-            });
-
-            const limite = 10;
-            const itensParaExibir = mostrarTodos ? alertas : alertas.slice(0, limite);
-
-            alertas.forEach((item, index) => {
+            db.forEach(item => {
                 const [d, m, y] = item.data.split('/');
                 const vencimento = new Date(y, m - 1, d);
                 const valorNum = cleanVal(item.valor);
+
+                // Diferença de dias (Negativo significa que já venceu)
                 const diffTime = vencimento - hoje;
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
+                let mostrar = false;
                 let statusHtml = '';
+
                 if (diffDays < 0) {
+                    // VENCIDO (Aqui entra o seu de 2013)
+                    mostrar = true;
+                    acumuladoAtrasado += valorNum;
                     statusHtml = `<span class="status-tag tag-vencido">VENCIDO HÁ ${Math.abs(diffDays)} DIAS</span>`;
-                } else {
+                } else if (diffDays <= 7) {
+                    // PRÓXIMO (Vence em até 7 dias)
+                    mostrar = true;
                     statusHtml = `<span class="status-tag tag-proximo">VENCE EM ${diffDays} DIAS</span>`;
                 }
 
-                if (index < itensParaExibir.length) {
+                if (mostrar) {
                     container.innerHTML += `
-                        <div class="a-row">
+                        <div class="item-row">
                             <div>
                                 <div style="font-weight:700; font-size:16px;">${item.empresa}</div>
                                 <div style="font-size:12px; color:var(--text); margin-top:5px;">Vencimento: ${item.data}</div>
@@ -209,23 +195,10 @@
                 }
             });
 
-            if (alertas.length > limite && !mostrarTodos) {
-                btnVerTudo.style.display = 'block';
-                btnVerTudo.innerText = `Ver todos os ${alertas.length} alertas`;
-            } else {
-                btnVerTudo.style.display = 'none';
-            }
-
             totalAtrasadoEl.innerText = acumuladoAtrasado.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
             lucide.createIcons();
         }
 
-        document.getElementById('btn-ver-tudo').onclick = () => {
-            mostrarTodos = true;
-            renderAlertas();
-        };
-
-        window.onfocus = renderAlertas;
         window.onload = renderAlertas;
     </script>
 </body>
